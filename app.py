@@ -8,7 +8,8 @@ from urllib.parse import urlparse
 
 # === 🔐 Load from secrets ===
 GOOGLE_API_KEY = st.secrets["google"]["api_key"]
-GOOGLE_CX = st.secrets["google"]["search_engine_id"]
+GOOGLE_CX = st.secrets["google"]["search_engine_id"]  # Main medical CSE
+SOCIAL_GOOGLE_CX = st.secrets["google"]["social_search_engine_id"]  # Social media CSE
 OPENAI_API_KEY = st.secrets["openai_api_key"]
 GOOGLE_SHEET_NAME = st.secrets["google"]["sheet_name"]
 GCP_SERVICE_ACCOUNT = st.secrets["gcp_service_account"]
@@ -27,9 +28,9 @@ TRUSTED_SITES = [
 def compute_trust_score(link, snippet):
     domain = urlparse(link).netloc.lower()
 
-    if "nhs.uk" in domain or "cdc.gov" in domain or "who.int" in domain or "mayoclinic.org" in domain or "clevelandclinic.org" in domain:
+    if any(site in domain for site in ["nhs.uk", "cdc.gov", "who.int", "mayoclinic.org", "clevelandclinic.org"]):
         score = 5
-    elif "gov" in domain or "edu" in domain or "health.harvard.edu" in domain:
+    elif any(site in domain for site in ["gov", "edu", "health.harvard.edu"]):
         score = 4.5
     elif "webmd.com" in domain or "medlineplus.gov" in domain:
         score = 4
@@ -133,7 +134,7 @@ def get_social_snippets(query, num_results_per_site=5):
     snippets = []
     for site in SOCIAL_MEDIA_SITES:
         full_query = f"{query} ({site})"
-        params = {"key": GOOGLE_API_KEY, "cx": GOOGLE_CX, "q": full_query, "num": num_results_per_site}
+        params = {"key": GOOGLE_API_KEY, "cx": SOCIAL_GOOGLE_CX, "q": full_query, "num": num_results_per_site}
         try:
             response = requests.get("https://www.googleapis.com/customsearch/v1", params=params)
             response.raise_for_status()
@@ -151,17 +152,20 @@ def get_social_snippets(query, num_results_per_site=5):
 st.set_page_config(page_title="AI Medical Assistant", page_icon="🩺", layout="centered")
 st.title("🩺 AI-Powered Medical Assistant")
 
+if "history" not in st.session_state:
+    st.session_state.history = []
+if "last_question" not in st.session_state:
+    st.session_state.last_question = ""
+
 user_age = st.sidebar.text_input("Your Age (optional)")
 user_gender = st.sidebar.selectbox("Your Gender (optional)", ["Prefer not to say", "Male", "Female", "Other"])
 
 tab1, tab2, tab3 = st.tabs(["🧠 Ask Question", "📜 History", "🌐 Social Media Check"])
 
-if "history" not in st.session_state:
-    st.session_state.history = []
-
 with tab1:
     question = st.text_input("Enter your medical question:")
     if st.button("Get Answer") and question:
+        st.session_state.last_question = question
         demographics = f"For a {user_age}-year-old {user_gender.lower()}, " if user_age or user_gender != "Prefer not to say" else ""
         full_query = demographics + question
         with st.spinner("Generating response..."):
@@ -203,9 +207,9 @@ with tab2:
 
 with tab3:
     st.markdown("### 🌐 Social Media Medical Fact-Checking")
-    sm_query = st.text_input("Search health info on Reddit or HealthUnlocked:")
+    sm_query = st.session_state.last_question
 
-    if st.button("Verify Social Media Claims") and sm_query:
+    if sm_query:
         with st.spinner("Retrieving and analyzing posts..."):
             sm_snippets = get_social_snippets(sm_query)
             risk_advisories = get_risk_snippets(sm_query)
@@ -253,6 +257,8 @@ Always end with: "Social media content may not be fully reliable. Consult a heal
                 st.markdown("**🔍 Fact-Check Result:**")
                 st.info(fact_check)
                 st.markdown("---")
+    else:
+        st.info("Ask a question in Tab 1 to populate social media analysis.")
 
 # === Feedback Form ===
 st.markdown("---")
