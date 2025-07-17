@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 # === 🔐 Load from secrets ===
 GOOGLE_API_KEY = st.secrets["google"]["api_key"]
 GOOGLE_CX = st.secrets["google"]["search_engine_id"]  # Main medical CSE
-SOCIAL_GOOGLE_CX = st.secrets["google"]["SOCIAL_GOOGLE_CX"]  # Social media CSE
+SOCIAL_GOOGLE_CX = st.secrets["google"]["SOCIAL_"]  # Social media CSE
 OPENAI_API_KEY = st.secrets["openai_api_key"]
 GOOGLE_SHEET_NAME = st.secrets["google"]["sheet_name"]
 GCP_SERVICE_ACCOUNT = st.secrets["gcp_service_account"]
