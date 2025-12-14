@@ -105,7 +105,7 @@ RISK_SNIPPETS = {
     "detox": "Your body detoxifies naturally; detox teas or regimens are often unnecessary and risky.",
     "fatigue": "Persistent fatigue might signal anemia, thyroid issues, or depression.",
     "vision loss": "Sudden vision loss is a medical emergency. Seek immediate care.",
-    "headache": "Sudden severe headache could mean stroke. Don’t delay medical help.",
+    "headache": "Sudden severe headache could mean stroke. Don't delay medical help.",
     "chest pain": "Chest pain might indicate a heart attack. Go to the ER immediately.",
     "rash": "If rash is accompanied by fever or trouble breathing, see a doctor quickly."
 }
@@ -260,24 +260,24 @@ Always end with: "Social media content may not be fully reliable. Consult a heal
     else:
         st.info("Ask a question in Tab 1 to populate social media analysis.")
 
-# === Feedback Form ===
-st.markdown("---")
-st.markdown("### 💬 Leave Feedback")
+# # === Feedback Form ===
+# st.markdown("---")
+# st.markdown("### 💬 Leave Feedback")
 
-creds = Credentials.from_service_account_info(GCP_SERVICE_ACCOUNT, scopes=[
-    "https://spreadsheets.google.com/feeds",
-    "https://www.googleapis.com/auth/drive"
-])
-gc = gspread.authorize(creds)
-feedback_sheet = gc.open(GOOGLE_SHEET_NAME).sheet1
+# creds = Credentials.from_service_account_info(GCP_SERVICE_ACCOUNT, scopes=[
+#     "https://spreadsheets.google.com/feeds",
+#     "https://www.googleapis.com/auth/drive"
+# ])
+# gc = gspread.authorize(creds)
+# feedback_sheet = gc.open(GOOGLE_SHEET_NAME).sheet1
 
-with st.form("feedback_form"):
-    st.markdown("*(Optional)* Rate your experience and provide feedback.")
-    rating = st.radio("How would you rate your experience?", ["⭐", "⭐⭐", "⭐⭐⭐", "⭐⭐⭐⭐", "⭐⭐⭐⭐⭐"], index=4, horizontal=True)
-    comments = st.text_area("Your Feedback")
-    if st.form_submit_button("Submit Feedback"):
-        feedback_sheet.append_row([rating, comments])
-        st.success("✅ Thank you for your feedback!")
+# with st.form("feedback_form"):
+#     st.markdown("*(Optional)* Rate your experience and provide feedback.")
+#     rating = st.radio("How would you rate your experience?", ["⭐", "⭐⭐", "⭐⭐⭐", "⭐⭐⭐⭐", "⭐⭐⭐⭐⭐"], index=4, horizontal=True)
+#     comments = st.text_area("Your Feedback")
+#     if st.form_submit_button("Submit Feedback"):
+#         feedback_sheet.append_row([rating, comments])
+#         st.success("✅ Thank you for your feedback!")
 
 # === Footer ===
 st.markdown("---")
